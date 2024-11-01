@@ -37,7 +37,7 @@
         </encoder>
     </appender>
     <!-- Root logger-->
-    <root level="debug">
+    <root level="warn">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="SPLUNK" />
        <!-- <appender-ref ref="ROLLING-FILE"/>-->
