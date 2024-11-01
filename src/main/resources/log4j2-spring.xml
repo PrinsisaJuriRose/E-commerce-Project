@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+     <!--Console appender to view logs locally-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+   <!--  Splunk HEC appender-->
+    <appender name="SPLUNK" class="com.splunk.logging.HttpEventCollectorLogbackAppender">
+        <url>http://localhost:8088</url>  <!--Use your Splunk HEC endpoint URL-->
+        <token>e3a42c1c-1957-447c-beef-0c3a1c76f1a9</token>  <!--Replace with your Splunk HEC token-->
+        <source>http-event-logs</source>
+        <sourcetype>log4j</sourcetype>
+        <index>ecommrce_project_dev</index>  <!--Ensure this is a valid index in Splunk-->
+        <host>localhost</host>
+        <type>row</type>
+        <messageFormat>text</messageFormat>
+        <disableCertificateValidation>true</disableCertificateValidation>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%msg</pattern>
+        </layout>
+    </appender>
+
+    <appender name="ROLLING-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/ecommerce-app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>30MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- Root logger-->
+    <root level="warn">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="SPLUNK" />
+       <!-- <appender-ref ref="ROLLING-FILE"/>-->
+    </root>
+</configuration>

@@ -5,8 +5,12 @@ import com.example.demo.model.persistence.User;
 import com.example.demo.model.persistence.repositories.CartRepository;
 import com.example.demo.model.persistence.repositories.UserRepository;
 import com.example.demo.model.requests.CreateUserRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import java.util.logging.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class UserController {
 
-	private static final Logger log = LoggerFactory.getLogger(UserController.class);
+//	private static final Logger log = LoggerFactory.getLogger(UserController.class);
+	private static final Logger log= LogManager.getLogger(UserController.class);
+
 	private static final int MIN_PASSWORD_LENGTH = 7;
 
 	@Autowired
@@ -31,11 +37,13 @@ public class UserController {
 
 	@GetMapping("/id/{id}")
 	public ResponseEntity<User> findById(@PathVariable Long id) {
+		log.warn("UserController:findById called with id {}", id);
 		return ResponseEntity.of(userRepository.findById(id));
 	}
 	
 	@GetMapping("/{username}")
 	public ResponseEntity<User> findByUserName(@PathVariable String username) {
+		log.warn("UserController:findByUserName called with username {}", username);
 		User user = userRepository.findByUsername(username);
 		return user == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(user);
 	}
@@ -45,18 +53,20 @@ public class UserController {
 		User user = new User();
 		user.setUsername(createUserRequest.getUsername());
 
-		log.info("Username set with: "+ createUserRequest.getUsername());
+		log.warn("UserController:createUser called with username: {}", createUserRequest.getUsername());
 		Cart cart = new Cart();
 		cartRepository.save(cart);
 		user.setCart(cart);
 		if(createUserRequest.getPassword().length()< MIN_PASSWORD_LENGTH ||
 				!createUserRequest.getPassword().equals(createUserRequest.getConfirmPassword())){
-			log.error("Error - Either length is less than {} or pass and conf pass do not match. Unable to create {}",
+			log.error("UserController:createUser Error - Either length is less than {} or pass and conf pass do not match. Unable to create {}",
 					MIN_PASSWORD_LENGTH , createUserRequest.getUsername());
 			return ResponseEntity.badRequest().build();
 		}
 		user.setPassword(bCryptPasswordEncoder.encode(createUserRequest.getPassword()));
 		userRepository.save(user);
+		log.warn("UserController:createUser New user {} created", createUserRequest.getUsername());
+
 		return ResponseEntity.ok(user);
 	}
 	
